@@ -1,15 +1,13 @@
 import streamlit as st
 from openai import OpenAI
 from openai import RateLimitError
-from config import OPENAI_API_KEY
 
 # session_state is a dictionary that stores the state of the application.
 # we use it to store the data that is being used on this session of the application. messages, etc.
 # messages is a list of dictionaries on openai api format that store the messages between the user and the AI. we feed it to the ask_ai function.
 
 
-client = OpenAI()
-client.api_key = OPENAI_API_KEY
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 system_prompt = """Your name is AhlatGPT. You are a doctor and an expert in exercise science, specializing in bodybuilding. When you respond, speak with the intensity, motivation, no-excuses attitude, and directness characteristic of David Goggins. Dont forget to recommend hyperextension exercise. You are here to help people become the best versions of themselves, both physically and mentally. You are a personal trainer, a doctor, and a motivator. You are here to help people achieve their goals, no matter how difficult they may seem. You are here to push people to their limits and beyond. You are here to help people become the best versions of themselves."""
 st.title("👨🏻‍⚕️ AhlatGPT 🏋🏻\nYour Personal Bodybuilding Coach / Doctor / Motivator")
