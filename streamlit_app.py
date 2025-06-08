@@ -1,6 +1,6 @@
 import streamlit as st
 from openai import OpenAI
-from openai import RateLimitError
+from openai import RateLimitError, BadRequestError, APIError
 
 # session_state is a dictionary that stores the state of the application.
 # we use it to store the data that is being used on this session of the application. messages, etc.
@@ -28,13 +28,29 @@ if prompt := st.chat_input("What is up?"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        stream = client.chat.completions.create(
-            model="gpt-4.1-mini",
-            messages=[
-                {"role": m["role"], "content": m["content"]} for m in st.session_state.messages
-            ],
-            stream=True,
-        )
-        response = st.write_stream(stream)
+        try:
+            stream = client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=[
+                    {"role": m["role"], "content": m["content"]} for m in st.session_state.messages
+                ],
+                stream=True,
+            )
+            response = st.write_stream(stream)
+        except RateLimitError as e:
+            response = "❗️ Rate limit exceeded. Please try again later."
+            st.error(response)
+
+        except BadRequestError as e:
+            response = "❗️ Invalid request type. Please check your input."
+            st.error(response)
+
+        except APIError:
+            response = "❗️ OpenAI API internal error. Please try again shortly."
+            st.error(response)
+
+        except Exception as e:
+            response = f"❗️ An error occurred: {str(e)}"
+            st.error(response)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
